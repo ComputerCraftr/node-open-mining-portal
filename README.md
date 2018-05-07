@@ -1,3 +1,8 @@
+## This repo is looking for maintainers! Please reach out if interested.
+
+--------
+
+
 # NOMP ![NOMP Logo](http://zone117x.github.io/node-open-mining-portal/logo.svg "NOMP Logo")
 #### Node Open Mining Portal
 
