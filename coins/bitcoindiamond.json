@@ -1,0 +1,7 @@
+{
+    "name": "Bitcoin Diamond",
+    "symbol": "BCD",
+    "algorithm": "x13bcd",
+    "peerMagic": "bddeb4d9",
+    "peerMagicTestnet": "0b110907"
+}

@@ -1,0 +1,7 @@
+{
+    "name": "Dinero",
+    "symbol": "DIN",
+    "algorithm": "neoscrypt",
+    "peerMagic": "48b3f221",
+    "peerMagicTestnet": "c9f2cbf0"
+}

@@ -1,0 +1,8 @@
+{
+    "name": "Verium",
+    "symbol": "VRM",
+    "algorithm": "scrypt",
+    "nValue": "1048576",
+    "peerMagic": "70352205",
+    "peerMagicTestnet": "cdf2c0ef"
+}
