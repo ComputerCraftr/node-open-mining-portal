@@ -193,7 +193,7 @@
                 return false;
             })()
         }}
-        <div class="menuHeader">Coin-Switching Ports</div>
+        <div class="menuHeader">Coins</div>
         {{?}}
 
         <div class="menuList">
@@ -228,21 +228,22 @@
 
     <div id="main">
         <a href="#" class="miningOption" id="nompAppDownload">
-            <div class="miningOptionNum">1.</div>
+            <!-- <div class="miningOptionNum">1.</div> -->
             <div class="miningOptionInstructions">
-                <div>Download NOMP App</div>
-                <div>Our preconfigured app makes mining that easy</div>
+                <div>Thanks and we hope you enjoy mining here.</div>
+				<div>Please select a coin on the left for more information</div>
+                <!-- <div>Our preconfigured app makes mining that easy</div> -->
             </div>
         </a>
         <div id="orHolder">
             <div id="orLine"></div>
-            <div id="orText">or</div>
+            <!-- <div id="orText">or</div>
         </div>
         <a href="#" class="miningOption" id="coinGlowTrigger">
             <div class="miningOptionNum">2.</div>
             <div class="miningOptionInstructions">
                 <div>Select a coin for connection details</div>
-                <div>Configurations for each coin are available for advanced miners</div>
+                <div>Configurations for each coin are available for advanced miners</div> -->
             </div>
         </a>
     </div>
@@ -307,12 +308,6 @@
         event.preventDefault();
         $('#coinInfoBackground,#coinInfo').addClass('hidden');
         $('#coinInfoBackground').css('opacity', 0.0);
-        return false;
-    });
-
-    $('#nompAppDownload').click(function(event){
-        event.preventDefault();
-        alert('NOMP App development still in progress...');
         return false;
     });
 </script>
