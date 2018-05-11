@@ -1,8 +1,8 @@
 {
     "enabled": false,
-    "coin": "litecoin.json",
-
-    "address": "n4jSe18kZMCdGcZqaYprShXW6EH1wivUK1",
+    "coin": "bitcoingold.json",
+    
+    "address": "",
     "_comment_address": "a transparent address to send coinbase rewards to and to transfer to zAddress.",
     
     "zAddress": "",
@@ -14,8 +14,7 @@
     "walletInterval": 5,
     
     "rewardRecipients": {
-        "n37vuNFkXfk15uFnGoVyHZ6PYQxppD3QqK": 1.5,
-        "22851477d63a085dbc2398c8430af1c09e7343f6": 0.1
+        "": 1.0
     },
     
     "tlsOptions": {
@@ -36,57 +35,51 @@
         "maxBlocksPerPayment": 3,
         "daemon": {
             "host": "127.0.0.1",
-            "port": 19332,
-            "user": "testuser",
-            "password": "testpass"
+            "port": 8332,
+            "user": "username",
+            "password": "password"
         }
     },
-
+    
     "ports": {
-        "3008": {
-            "diff": 8
-        },
-        "3032": {
+        "3857": {
             "tls":false,
-            "diff": 32,
+            "diff": 0.05,
             "varDiff": {
-                "minDiff": 8,
-                "maxDiff": 512,
+                "minDiff": 0.04,
+                "maxDiff": 16,
                 "targetTime": 15,
-                "retargetTime": 90,
+                "retargetTime": 60,
                 "variancePercent": 30
             }
-        },
-        "3256": {
-            "diff": 256
         }
     },
     
     "daemons": [
-        {
-            "host": "127.0.0.1",
-            "port": 19332,
-            "user": "testuser",
-            "password": "testpass"
-        }
-    ],
-
+                {
+                "host": "127.0.0.1",
+                "port": 8332,
+                "user": "username",
+                "password": "password"
+                }
+                ],
+    
     "p2p": {
-        "enabled": true,
+        "enabled": false,
         "host": "127.0.0.1",
         "port": 19333,
         "disableTransactions": true
     },
-
+    
     "mposMode": {
         "enabled": false,
         "host": "127.0.0.1",
         "port": 3306,
         "user": "me",
         "password": "mypass",
-        "database": "ltc",
+        "database": "kmd",
         "checkPassword": true,
         "autoCreateWorker": false
     }
-
+    
 }

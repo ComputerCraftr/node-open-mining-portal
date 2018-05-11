@@ -1,0 +1,6 @@
+{
+    "name": "Bitcoin Gold",
+    "symbol": "BTG",
+    "algorithm": "equihash",
+    "txfee": 0.000005
+}

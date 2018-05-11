@@ -25,9 +25,14 @@ module.exports = function(logger, poolConfig){
     var logSystem = 'Pool';
     var logComponent = coin;
     var logSubCat = 'Thread ' + (parseInt(forkId) + 1);
-
+    
+    var lastRedisSync = 0;
+    var redisCommands = [];
+    
     var connection = redis.createClient(redisConfig.port, redisConfig.host);
-
+    if (redisConfig.password) {
+        connection.auth(redisConfig.password);
+    }
     connection.on('ready', function(){
         logger.debug(logSystem, logComponent, logSubCat, 'Share processing setup with redis (' + redisConfig.host +
             ':' + redisConfig.port  + ')');
@@ -38,7 +43,6 @@ module.exports = function(logger, poolConfig){
     connection.on('end', function(){
         logger.error(logSystem, logComponent, logSubCat, 'Connection to redis database has been ended');
     });
-
     connection.info(function(error, response){
         if (error){
             logger.error(logSystem, logComponent, logSubCat, 'Redis version check failed');
@@ -65,20 +69,15 @@ module.exports = function(logger, poolConfig){
         }
     });
 
+    this.handleShare = function(isValidShare, isValidBlock, shareData) {
 
-    this.handleShare = function(isValidShare, isValidBlock, shareData){
-
-        var redisCommands = [];
-        
-        shareData.worker = shareData.worker.replace(/([\-_.!~*'()].*)/g, '').replace(/\s+/g, ''); // strip any extra strings from worker name.
-
-        if (isValidShare){
+        if (isValidShare) {
             redisCommands.push(['hincrbyfloat', coin + ':shares:roundCurrent', shareData.worker, shareData.difficulty]);
             redisCommands.push(['hincrby', coin + ':stats', 'validShares', 1]);
-        }
-        else{
+        } else {
             redisCommands.push(['hincrby', coin + ':stats', 'invalidShares', 1]);
         }
+
         /* Stores share diff, worker, and unique value with a score that is the timestamp. Unique value ensures it
            doesn't overwrite an existing entry, and timestamp as score lets us query shares from last X minutes to
            generate hashrate for each worker and pool. */
@@ -88,19 +87,26 @@ module.exports = function(logger, poolConfig){
 
         if (isValidBlock){
             redisCommands.push(['rename', coin + ':shares:roundCurrent', coin + ':shares:round' + shareData.height]);
-            redisCommands.push(['sadd', coin + ':blocksPending', [shareData.blockHash, shareData.txHash, shareData.height].join(':')]);
+            redisCommands.push(['rename', coin + ':shares:timesCurrent', coin + ':shares:times' + shareData.height]);
+            redisCommands.push(['sadd', coin + ':blocksPending', [shareData.blockHash, shareData.txHash, shareData.height, shareData.worker, dateNow].join(':')]);
             redisCommands.push(['hincrby', coin + ':stats', 'validBlocks', 1]);
+            lastRedisSync = 0; // in order to submit data to redis
         }
         else if (shareData.blockHash){
             redisCommands.push(['hincrby', coin + ':stats', 'invalidBlocks', 1]);
         }
 
-        connection.multi(redisCommands).exec(function(err, replies){
-            if (err)
-                logger.error(logSystem, logComponent, logSubCat, 'Error with share processor multi ' + JSON.stringify(err));
-        });
-
-
+        if (Date.now() - lastRedisSync >= 1000) {
+            lastRedisSync = Date.now();
+            var executionStart = Date.now();
+            var executedOperations = redisCommands.length;
+            connection.multi(redisCommands).exec(function(err, replies){
+                                                 console.log("Share processor Redis execution time: " + (Date.now() - executionStart).toString() + " Executed operations: " + executedOperations.toString());
+                                                 if (err)
+                                                 logger.error(logSystem, logComponent, logSubCat, 'Error with share processor multi ' + JSON.stringify(err));
+                                                 });
+            redisCommands = [];
+        }
     };
 
 };

@@ -1,6 +1,15 @@
 {
     "logLevel": "debug",
     "logColors": true,
+    
+    "logging": {
+    	"auth": true,
+        "files": {
+            "level": "info",
+            "directory": "logs",
+            "flushInterval": 5
+        }
+        },
 
     "cliPort": 17117,
 
@@ -10,7 +19,7 @@
     },
 
     "defaultPoolConfigs": {
-        "blockRefreshInterval": 1000,
+        "blockRefreshInterval": 500,
         "jobRebroadcastTimeout": 55,
         "connectionTimeout": 600,
         "emitInvalidBlockHashes": false,
@@ -25,23 +34,29 @@
         },
         "redis": {
             "host": "127.0.0.1",
-            "port": 6379
+            "port": 6379,
+            "password": ""
         }
     },
 
     "website": {
         "enabled": true,
         "host": "0.0.0.0",
-        "port": 80,
+        "port": 8080,
         "stratumHost": "cryppit.com",
         "stats": {
-            "updateInterval": 60,
-            "historicalRetention": 43200,
+            "updateInterval": 30,
+            "historicalRetention": 14400,
             "hashrateWindow": 300
         },
         "adminCenter": {
-            "enabled": true,
+            "enabled": false,
             "password": "password"
+        },
+        "tlsOptions" : {
+            "enabled": false,
+            "cert": "",
+            "key": ""
         }
     },
 
@@ -91,10 +106,10 @@
                     "diff": 0.001,
                     "varDiff": {
                         "minDiff": 0.001,
-                        "maxDiff": 1, 
-                        "targetTime": 15, 
-                        "retargetTime": 60, 
-                        "variancePercent": 30 
+                        "maxDiff": 1,
+                        "targetTime": 15,
+                        "retargetTime": 60,
+                        "variancePercent": 30
                     }
                 }
             }
