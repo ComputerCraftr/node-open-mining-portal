@@ -295,8 +295,8 @@ function SetupForPool(logger, poolOptions, setupFinished){
 
         var amount = satoshisToCoins(zBalance - 10000);
         // unshield no more than 100 ZEC at a time
-        if (amount > 100.0)
-            amount = 100.0;
+        // if (amount > 100.0)
+            // amount = 100.0;
 
         var params = [poolOptions.zAddress, [{'address': poolOptions.tAddress, 'amount': amount}]];
         daemon.cmd('z_sendmany', params,
@@ -373,7 +373,7 @@ function SetupForPool(logger, poolOptions, setupFinished){
                     finalRedisCommands.push(['hset', coin + ':stats', 'networkSols', result[0].response.networkhashps]);
                 }
 
-                daemon.cmd('getnetworkinfo', params,
+                daemon.cmd('getinfo', params,
                     function (result) {
                         if (!result || result.error || result[0].error || !result[0].response) {
                             logger.error(logSystem, logComponent, 'Error with RPC call getnetworkinfo '+JSON.stringify(result[0].error));
@@ -386,9 +386,9 @@ function SetupForPool(logger, poolOptions, setupFinished){
                         if (result[0].response.version !== null) {
                             finalRedisCommands.push(['hset', coin + ':stats', 'networkVersion', result[0].response.version]);
                         }
-                        if (result[0].response.subversion !== null) {
-                            finalRedisCommands.push(['hset', coin + ':stats', 'networkSubVersion', result[0].response.subversion]);
-                        }
+                        // if (result[0].response.subversion !== null) {
+                            // finalRedisCommands.push(['hset', coin + ':stats', 'networkSubVersion', result[0].response.subversion]);
+                        // }
                         if (result[0].response.protocolversion !== null) {
                             finalRedisCommands.push(['hset', coin + ':stats', 'networkProtocolVersion', result[0].response.protocolversion]);
                         }
@@ -1403,17 +1403,13 @@ function SetupForPool(logger, poolOptions, setupFinished){
     // In pool_config file you can add "invalidAddress":"you address" to send the money to.
     // If not provided - you support the development of btg-nomp
     var getProperAddress = function(address){
+        if (address.length === 40){
+            return util.addressFromEx(poolOptions.address, address);
+		}
 
         if (address.length < 25 || address.length > 34) {
-            return (poolOptions.invalidAddress || (poolOptions.testnet === true ? "n1nKYxXxND5ejxCeA38LQATDuCqnCG1E1y" : "GbmcUSDpqKfHLV4aiYbpLRZypLkANRfmu6"));
-        }
-
-        if (poolOptions.testnet === true && address[0] !== 'm' && address[0] !== 'n' && address[0] !== '2') {
-            return (poolOptions.invalidAddress || "n1nKYxXxND5ejxCeA38LQATDuCqnCG1E1y");
-        }
-
-        if (poolOptions.testnet === false && address[0] !== 'G' && address[0] !== 'A') {
-            return (poolOptions.invalidAddress || "GbmcUSDpqKfHLV4aiYbpLRZypLkANRfmu6");
+            logger.warning(logSystem, logComponent, 'Invalid address '+address+', convert to address '+(poolOptions.invalidAddress || poolOptions.address));
+            return (poolOptions.invalidAddress || poolOptions.address);
         }
 
         return address;

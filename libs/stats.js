@@ -136,7 +136,7 @@ module.exports = function(logger, portalConfig, poolConfigs){
 
 	function getWorkerStats(address) {
 		address = address.split(".")[0];
-		if (address.length > 0 && address.startsWith('t')) {
+		if (address.length > 0) {
 			for (var h in statHistory) {
 				for(var pool in statHistory[h].pools) {
 
