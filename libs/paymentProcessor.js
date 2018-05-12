@@ -363,33 +363,37 @@ function SetupForPool(logger, poolOptions, setupFinished){
                 var coin = logComponent;
                 var finalRedisCommands = [];
                 
-                if (result[0].response.blocks !== null) {
-                    finalRedisCommands.push(['hset', coin + ':stats', 'networkBlocks', result[0].response.blocks]);
-                }
-                if (result[0].response.difficulty !== null) {
-                    finalRedisCommands.push(['hset', coin + ':stats', 'networkDiff', result[0].response.difficulty]);
-                }
-                if (result[0].response.networkhashps !== null) {
-                    finalRedisCommands.push(['hset', coin + ':stats', 'networkSols', result[0].response.networkhashps]);
-                }
+				if (result[0].response.blocks != null) {
+					finalRedisCommands.push(['hset', coin + ':stats', 'networkBlocks', result[0].response.blocks]);
+				}
+				if (result[0].response.difficulty != null) {
+					finalRedisCommands.push(['hset', coin + ':stats', 'networkDiff', result[0].response.difficulty]);
+				}
+				if (result[0].response.networkhashps != null) {
+					finalRedisCommands.push(['hset', coin + ':stats', 'networkSols', result[0].response.networkhashps]);
+				}
+				else if (result[0].response.netmhashps != null)
+				{
+					finalRedisCommands.push(['hset', coin + ':stats', 'networkSols', result[0].response.netmhashps*1000000]);
+				}
 
                 daemon.cmd('getinfo', params,
                     function (result) {
                         if (!result || result.error || result[0].error || !result[0].response) {
-                            logger.error(logSystem, logComponent, 'Error with RPC call getnetworkinfo '+JSON.stringify(result[0].error));
+                            logger.error(logSystem, logComponent, 'Error with RPC call getinfo '+JSON.stringify(result[0].error));
                             return;
                         }
                         
-                        if (result[0].response.connections !== null) {
+                        if (result[0].response.connections != null) {
                             finalRedisCommands.push(['hset', coin + ':stats', 'networkConnections', result[0].response.connections]);
                         }
-                        if (result[0].response.version !== null) {
+                        if (result[0].response.version != null) {
                             finalRedisCommands.push(['hset', coin + ':stats', 'networkVersion', result[0].response.version]);
                         }
-                        // if (result[0].response.subversion !== null) {
-                            // finalRedisCommands.push(['hset', coin + ':stats', 'networkSubVersion', result[0].response.subversion]);
-                        // }
-                        if (result[0].response.protocolversion !== null) {
+                        if (result[0].response.subversion != null) {
+                            finalRedisCommands.push(['hset', coin + ':stats', 'networkSubVersion', result[0].response.subversion]);
+                        }
+                        if (result[0].response.protocolversion != null) {
                             finalRedisCommands.push(['hset', coin + ':stats', 'networkProtocolVersion', result[0].response.protocolversion]);
                         }
 
@@ -735,7 +739,8 @@ function SetupForPool(logger, poolOptions, setupFinished){
                         }
                         var round = rounds[i];
                         // update confirmations for round
-                        round.confirmations = parseInt((tx.result.confirmations || 0));
+                        if (tx && tx.result)
+                            round.confirmations = parseInt((tx.result.confirmations || 0));
                         // look for transaction errors
                         if (tx.error && tx.error.code === -5){
                             logger.warning(logSystem, logComponent, 'Daemon reports invalid transaction: ' + round.txHash);
