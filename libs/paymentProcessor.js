@@ -73,6 +73,7 @@ function SetupForPool(logger, poolOptions, setupFinished){
     var getMarketStats = poolOptions.coin.getMarketStats === true;
     var requireShielding = poolOptions.coin.requireShielding === true;
     var fee = parseFloat(poolOptions.coin.txfee) || parseFloat(0.0004);
+    var usePrivatesend = poolOptions.coin.usePrivatesend === true;
 
     logger.debug(logSystem, logComponent, logComponent + ' requireShielding: ' + requireShielding);
     logger.debug(logSystem, logComponent, logComponent + ' minConf: ' + minConfShield);
@@ -88,6 +89,14 @@ function SetupForPool(logger, poolOptions, setupFinished){
     if (poolOptions.redis.password) {
         redisClient.auth(poolOptions.redis.password);
     }
+
+	if (usePrivatesend)
+	{
+		daemon.cmd('privatesend', null, function (result) {
+			usePrivatesend = !(!result || !result[0].response || result[0].response.message == "Method not found");
+		});
+	}
+	logger.debug(logSystem, logComponent, logComponent + ' usePrivatesend: ' + usePrivatesend);
 
     var magnitude;
     var minPaymentSatoshis;
@@ -318,6 +327,49 @@ function SetupForPool(logger, poolOptions, setupFinished){
             }
         );
     }
+
+    //send address balance to t_address
+    //TODO: use darksend/privatesend on capable coins
+    function sendToT (callback, balance) {
+        if (callback === true)
+            return;
+        if (balance === NaN) {
+            logger.error(logSystem, logComponent, 'balance === NaN for sendToT');
+            return;
+        }
+        if ((balance - 10000) <= 0)
+            return;
+
+        // do not allow more than a single sendmany operation at a time
+        if (opidCount > 0) {
+            logger.warning(logSystem, logComponent, 'sendToT is waiting, too many sendmany operations already in progress.');
+            return;
+        }
+
+        var amount = satoshisToCoins(balance - 10000);
+		if (usePrivatesend)
+			var params = ["", [{poolOptions.tAddress, amount}], 5, false, "", "", false, true];
+		else
+			var params = ["", [{poolOptions.tAddress, amount}]];
+        daemon.cmd('sendmany', params,
+            function (result) {
+                //Check if payments failed because wallet doesn't have enough coins to pay for tx fees
+                if (!result || result.error || result[0].error || !result[0].response) {
+                    logger.error(logSystem, logComponent, 'Error trying to move balance '+amount+' '+JSON.stringify(result[0].error));
+                    callback = function (){};
+                    callback(true);
+                }
+                else {
+                    var opid = (result.response || result[0].response);                    
+                    opidCount++;
+                    opids.push(opid);
+                    logger.special(logSystem, logComponent, 'Move funds for payout ' + amount + ' ' + opid);
+                    callback = function (){};
+                    callback(null);
+                }
+            }
+        );
+    }
     
     function cacheMarketStats() {
         var marketStatsUpdate = [];
@@ -354,7 +406,7 @@ function SetupForPool(logger, poolOptions, setupFinished){
     function cacheNetworkStats () {
         var params = null;
         daemon.cmd('getmininginfo', params,
-            function (result) {                
+            function (result) {
                 if (!result || result.error || result[0].error || !result[0].response) {
                     logger.error(logSystem, logComponent, 'Error with RPC call getmininginfo '+JSON.stringify(result[0].error));
                     return;
@@ -363,13 +415,20 @@ function SetupForPool(logger, poolOptions, setupFinished){
                 var coin = logComponent;
                 var finalRedisCommands = [];
                 
-				if (result[0].response.blocks != null) {
+				if (result[0].response.blocks != null)
+				{
 					finalRedisCommands.push(['hset', coin + ':stats', 'networkBlocks', result[0].response.blocks]);
 				}
-				if (result[0].response.difficulty != null) {
+				if (result[0].response.difficulty != null && !isNaN(result[0].response.difficulty))
+				{
 					finalRedisCommands.push(['hset', coin + ':stats', 'networkDiff', result[0].response.difficulty]);
 				}
-				if (result[0].response.networkhashps != null) {
+				else if (result[0].response.difficulty.proof-of-work != null)
+				{
+					finalRedisCommands.push(['hset', coin + ':stats', 'networkDiff', result[0].response.difficulty.proof-of-work]);
+				}
+				if (result[0].response.networkhashps != null)
+				{
 					finalRedisCommands.push(['hset', coin + ':stats', 'networkSols', result[0].response.networkhashps]);
 				}
 				else if (result[0].response.netmhashps != null)
@@ -383,19 +442,23 @@ function SetupForPool(logger, poolOptions, setupFinished){
                             logger.error(logSystem, logComponent, 'Error with RPC call getinfo '+JSON.stringify(result[0].error));
                             return;
                         }
-                        
-                        if (result[0].response.connections != null) {
-                            finalRedisCommands.push(['hset', coin + ':stats', 'networkConnections', result[0].response.connections]);
-                        }
-                        if (result[0].response.version != null) {
-                            finalRedisCommands.push(['hset', coin + ':stats', 'networkVersion', result[0].response.version]);
-                        }
-                        if (result[0].response.subversion != null) {
-                            finalRedisCommands.push(['hset', coin + ':stats', 'networkSubVersion', result[0].response.subversion]);
-                        }
-                        if (result[0].response.protocolversion != null) {
-                            finalRedisCommands.push(['hset', coin + ':stats', 'networkProtocolVersion', result[0].response.protocolversion]);
-                        }
+
+						if (result[0].response.connections != null)
+						{
+							finalRedisCommands.push(['hset', coin + ':stats', 'networkConnections', result[0].response.connections]);
+						}
+						if (result[0].response.version != null)
+						{
+							finalRedisCommands.push(['hset', coin + ':stats', 'networkVersion', result[0].response.version]);
+						}
+						if (result[0].response.subversion != null)
+						{
+							finalRedisCommands.push(['hset', coin + ':stats', 'networkSubVersion', result[0].response.subversion]);
+						}
+						if (result[0].response.protocolversion != null)
+						{
+							finalRedisCommands.push(['hset', coin + ':stats', 'networkProtocolVersion', result[0].response.protocolversion]);
+						}
 
                         if (finalRedisCommands.length <= 0)
                             return;

@@ -313,7 +313,7 @@ legend.append('text')
 {{ } }}
 
 <script>
-    document.querySelector('main').appendChild(document.createElement('script')).src = '/static/stats.js';
+    document.querySelector('main').appendChild(document.createElement('script')).src = 'static/stats.js';
 </script>
 
 
@@ -341,7 +341,7 @@ legend.append('text')
 	function getReadableNetworkHashRateString(hashrate){
 		hashrate = (hashrate * 1000000);
 		if (hashrate < 1000000)
-			return '0 Hashes';
+			return (Math.round(hashrate / 1000) / 1000 ).toFixed(2)+' H/s';
 		var byteUnits = [ ' H/s', ' KH/s', ' MH/s', ' GH/s', ' TH/s', ' PH/s' ];
 		var i = Math.floor((Math.log(hashrate/1000) / Math.log(1000)) - 1);
 		hashrate = (hashrate/1000) / Math.pow(1000, i + 1);

@@ -3,19 +3,19 @@
     "coin": "litecoin.json",
 
     "address": "n4jSe18kZMCdGcZqaYprShXW6EH1wivUK1",
-    "_comment_address": "a transparent address to send coinbase rewards to and to transfer to zAddress.",
+    "_comment_address": "an address to send coinbase rewards to and to transfer to tAddress.",
     
     "zAddress": "",
     "_comment_zAddress": "Not used",
     
     "tAddress": "",
-    "_comment_tAddress": "transparent address used to send payments, make this a different address, otherwise payments will not send",
+    "_comment_tAddress": "address used to send payments, make this a different address, otherwise payments will not send",
     
     "walletInterval": 5,
     
     "rewardRecipients": {
-        "n37vuNFkXfk15uFnGoVyHZ6PYQxppD3QqK": 1.5,
-        "22851477d63a085dbc2398c8430af1c09e7343f6": 0.1
+        "n37vuNFkXfk15uFnGoVyHZ6PYQxppD3QqK": 0.015,
+        "22851477d63a085dbc2398c8430af1c09e7343f6": 0.001
     },
     
     "tlsOptions": {
