@@ -274,7 +274,7 @@ function SetupForPool(logger, poolOptions, setupFinished){
                     callback(true);
                 }
                 else {
-                    var opid = (result.response || result[0].response);                    
+                    var opid = (result.response || result[0].response);
                     opidCount++;
                     opids.push(opid);
                     logger.special(logSystem, logComponent, 'Shield balance ' + amount + ' ' + opid);
@@ -317,7 +317,7 @@ function SetupForPool(logger, poolOptions, setupFinished){
                     callback(true);
                 }
                 else {
-                    var opid = (result.response || result[0].response);                    
+                    var opid = (result.response || result[0].response);
                     opidCount++;
                     opids.push(opid);
                     logger.special(logSystem, logComponent, 'Unshield funds for payout ' + amount + ' ' + opid);
@@ -329,7 +329,7 @@ function SetupForPool(logger, poolOptions, setupFinished){
     }
 
     //send address balance to t_address
-    //TODO: use darksend/privatesend on capable coins
+    //TODO: rewrite to use darksend/privatesend on capable coins
     function sendToT (callback, balance) {
         if (callback === true)
             return;
@@ -347,10 +347,11 @@ function SetupForPool(logger, poolOptions, setupFinished){
         }
 
         var amount = satoshisToCoins(balance - 10000);
+		var params = null;
 		if (usePrivatesend)
-			var params = ["", [{poolOptions.tAddress, amount}], 5, false, "", "", false, true];
+			params = ["", [{'address': poolOptions.tAddress, 'amount': amount}], 5, false, "", "", false, true];
 		else
-			var params = ["", [{poolOptions.tAddress, amount}]];
+			params = ["", [{'address': poolOptions.tAddress, 'amount': amount}]];
         daemon.cmd('sendmany', params,
             function (result) {
                 //Check if payments failed because wallet doesn't have enough coins to pay for tx fees
@@ -360,7 +361,7 @@ function SetupForPool(logger, poolOptions, setupFinished){
                     callback(true);
                 }
                 else {
-                    var opid = (result.response || result[0].response);                    
+                    var opid = (result.response || result[0].response);
                     opidCount++;
                     opids.push(opid);
                     logger.special(logSystem, logComponent, 'Move funds for payout ' + amount + ' ' + opid);
@@ -370,13 +371,13 @@ function SetupForPool(logger, poolOptions, setupFinished){
             }
         );
     }
-    
+
     function cacheMarketStats() {
         var marketStatsUpdate = [];
         var coin = logComponent.replace('_testnet', '').toLowerCase();
         if (coin == 'zen')
             coin = 'zencash';
-        
+
         request('https://api.coinmarketcap.com/v1/ticker/'+coin+'/', function (error, response, body) {
             if (error) {
                 logger.error(logSystem, logComponent, 'Error with http request to https://api.coinmarketcap.com/ ' + JSON.stringify(error));
@@ -411,10 +412,10 @@ function SetupForPool(logger, poolOptions, setupFinished){
                     logger.error(logSystem, logComponent, 'Error with RPC call getmininginfo '+JSON.stringify(result[0].error));
                     return;
                 }
-                
+
                 var coin = logComponent;
                 var finalRedisCommands = [];
-                
+
 				if (result[0].response.blocks != null)
 				{
 					finalRedisCommands.push(['hset', coin + ':stats', 'networkBlocks', result[0].response.blocks]);
@@ -423,9 +424,9 @@ function SetupForPool(logger, poolOptions, setupFinished){
 				{
 					finalRedisCommands.push(['hset', coin + ':stats', 'networkDiff', result[0].response.difficulty]);
 				}
-				else if (result[0].response.difficulty.proof-of-work != null)
+				else if (result[0].response.difficulty["proof-of-work"] != null)
 				{
-					finalRedisCommands.push(['hset', coin + ':stats', 'networkDiff', result[0].response.difficulty.proof-of-work]);
+					finalRedisCommands.push(['hset', coin + ':stats', 'networkDiff', result[0].response.difficulty["proof-of-work"]]);
 				}
 				if (result[0].response.networkhashps != null)
 				{
