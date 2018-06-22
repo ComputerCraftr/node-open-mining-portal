@@ -3,5 +3,5 @@
     "symbol": "BCD",
     "algorithm": "x13bcd",
     "peerMagic": "bddeb4d9",
-    "peerMagicTestnet": "0b110907"
+    "peerMagicTestnet": "0bcd2018"
 }

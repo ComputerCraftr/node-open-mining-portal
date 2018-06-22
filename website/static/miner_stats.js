@@ -3,6 +3,7 @@ var workerHashrateChart;
 var workerHistoryMax = 160;
 
 var statData;
+//var networkDiff;
 var totalHash;
 var totalImmature;
 var totalBal;
@@ -150,6 +151,8 @@ function updateStats() {
 	var _networkHashRate = parseFloat(statData.networkSols) * 1.2;
 	var _myHashRate = (totalHash / 1000000) * 2;
 	var luckDays =  ((_networkHashRate / _myHashRate * _blocktime) / (24 * 60 * 60)).toFixed(3);
+	// calculate probability of finding a block every day using network difficulty
+	//var luckDays = networkDiff*Math.pow(2,32)/(totalHash*86400);
 	// update miner stats
 	$("#statsHashrate").text(getReadableHashRateString(totalHash));
 	$("#statsHashrateAvg").text(getReadableHashRateString(calculateAverageHashrate(null)));
@@ -215,6 +218,11 @@ $.getJSON('/api/worker_stats?'+_miner, function(data){
 	rebuildWorkerDisplay();	
     updateStats();
 });
+
+//$.getJSON('/api/stats', function(data){
+	// find the algorithm worker is mining and get the current difficulty
+	//networkDiff = 0;
+//});
 
 // live stat updates
 statsSource.addEventListener('message', function(e){
