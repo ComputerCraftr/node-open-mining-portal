@@ -3,7 +3,7 @@
     "coin": "litecoin.json",
 
     "address": "n4jSe18kZMCdGcZqaYprShXW6EH1wivUK1",
-    "_comment_address": "an address to send coinbase rewards to and to transfer to tAddress.",
+    "_comment_address": "an address to send coinbase rewards to and to transfer to tAddress (do not use segwit addresses for accepting coinbase rewards!)",
     
     "zAddress": "",
     "_comment_zAddress": "Not used",
